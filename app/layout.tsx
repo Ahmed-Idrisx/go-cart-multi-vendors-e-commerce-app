@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import StoreProvider from "./StoreProvider";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "600"] });
 
@@ -25,8 +26,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster />
-          {children}
+          <StoreProvider>
+            <Toaster />
+            {children}
+          </StoreProvider>
         </ThemeProvider>
       </body>
     </html>
