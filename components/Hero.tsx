@@ -71,7 +71,7 @@ export default function Hero() {
                 20% discounts
               </p>
               <p className="flex items-center gap-1 mt-4 text-slate-800 dark:text-slate-200 cursor-pointer">
-                View more{" "}
+                Claim Offer{" "}
                 <ArrowRightIcon
                   className="group-hover:translate-x-1 transition-transform"
                   size={18}

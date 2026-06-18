@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ThemeToggler } from "./ThemeToggler";
+import { useAppSelector } from "@/hooks/hooks";
 
 export default function Navbar() {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const cartCount = useAppSelector((state) => state.cart.total);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +79,7 @@ export default function Navbar() {
                 className="text-slate-600 dark:text-slate-400"
               />
               <input
-                className="w-full bg-transparent outline-none placeholder-slate-600 dark:placeholder-slate-400 text-slate-950 dark:text-slate-55"
+                className="w-full bg-transparent outline-none placeholder-slate-600 dark:placeholder-slate-400 text-slate-950 dark:text-white dark:caret-white"
                 type="text"
                 placeholder="Search products"
                 value={search}
@@ -104,7 +106,7 @@ export default function Navbar() {
               <ShoppingCart size={18} />
               Cart
               <span className="absolute -top-1.5 left-3 text-[8px] text-white bg-green-600 size-3.5 rounded-full flex items-center justify-center font-bold">
-                3
+                {cartCount}
               </span>
             </Link>
 

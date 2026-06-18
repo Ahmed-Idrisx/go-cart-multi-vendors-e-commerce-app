@@ -1,10 +1,7 @@
-"use client";
-
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
-interface TitleProps {
+interface Title {
   title: string;
   description: string;
   visibleButton?: boolean;
@@ -16,7 +13,7 @@ export default function Title({
   description,
   visibleButton = true,
   href = "",
-}: TitleProps) {
+}: Title) {
   return (
     <div className="flex flex-col items-center">
       <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">

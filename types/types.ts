@@ -100,8 +100,8 @@ export interface Product {
   updatedAt: DateInput;
 
   // Relations
-  store?: Store;
-  rating?: Rating[];
+  store: Store;
+  rating: Rating[];
 }
 
 /** Trimmed-down Product, used wherever only id/name/category are embedded (e.g. inside a Rating) */
@@ -115,7 +115,7 @@ export interface Rating {
   id: string;
   rating: number;
   review: string;
-  userId?: string;
+  userId: string;
   productId: string;
   orderId?: string;
   createdAt: DateInput;

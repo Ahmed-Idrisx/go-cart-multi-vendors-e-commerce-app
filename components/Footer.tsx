@@ -238,7 +238,7 @@ export default function Footer() {
             ))}
           </div>
         </div>
-        <p className="py-4 text-sm text-slate-500 dark:text-slate-400">
+        <p className="py-4 text-center text-sm text-slate-500 dark:text-slate-400">
           Copyright 2026 © GoCart All Right Reserved.
         </p>
       </div>
