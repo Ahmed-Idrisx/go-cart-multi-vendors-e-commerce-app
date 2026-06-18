@@ -26,7 +26,7 @@ export default function ProductCard({ product }: { product: Product }) {
             />
           )}
         </div>
-        <div className="flex justify-between gap-3 text-sm text-slate-800 dark:text-slate-200 pt-2 max-w-60">
+        <div className="flex flex-col sm:flex-row justify-between gap-3 text-sm text-slate-800 dark:text-slate-200 pt-2 max-w-60">
           <div>
             <p className="font-medium truncate max-w-35 sm:max-w-45">
               {product.name}

@@ -171,7 +171,7 @@ export interface OrderItem {
   price: number;
 
   // Relation
-  product?: Product;
+  product: Product;
 }
 
 export interface Order {
@@ -195,7 +195,7 @@ export interface Order {
   orderItems: OrderItem[];
 
   // Relations
-  address?: Address;
+  address: Address;
   user?: User;
   store?: Store;
 }
