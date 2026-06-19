@@ -5,7 +5,11 @@ export const metadata = {
   description: "GoCart. - Store Dashboard",
 };
 
-export default function RootAdminLayout({ children }) {
+export default function RootAdminLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <>
       <StoreLayout>{children}</StoreLayout>
