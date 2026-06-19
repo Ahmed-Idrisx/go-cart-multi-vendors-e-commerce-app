@@ -74,7 +74,7 @@ export default function AdminCoupons() {
           <input
             type="text"
             placeholder="Coupon Code"
-            className="w-full mt-2 p-2 border border-slate-200 dark:border-slate-700 outline-slate-400 dark:outline-slate-500 rounded-md bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+            className="w-full mt-2 p-2 border border-slate-200 dark:border-slate-700 outline-none rounded-md bg-white dark:bg-slate-900  placeholder:text-slate-400 dark:placeholder:text-slate-500"
             name="code"
             value={newCoupon.code}
             onChange={handleChange}
@@ -85,7 +85,7 @@ export default function AdminCoupons() {
             placeholder="Coupon Discount (%)"
             min={1}
             max={100}
-            className="w-full mt-2 p-2 border border-slate-200 dark:border-slate-700 outline-slate-400 dark:outline-slate-500 rounded-md bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+            className="w-full mt-2 p-2 border border-slate-200 dark:border-slate-700 outline-none rounded-md bg-white dark:bg-slate-900  placeholder:text-slate-400 dark:placeholder:text-slate-500"
             name="discount"
             value={newCoupon.discount}
             onChange={handleChange}
@@ -95,7 +95,7 @@ export default function AdminCoupons() {
         <input
           type="text"
           placeholder="Coupon Description"
-          className="w-full mt-2 p-2 border border-slate-200 dark:border-slate-700 outline-slate-400 dark:outline-slate-500 rounded-md bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+          className="w-full mt-2 p-2 border border-slate-200 dark:border-slate-700 outline-none rounded-md bg-white dark:bg-slate-900  placeholder:text-slate-400 dark:placeholder:text-slate-500"
           name="description"
           value={newCoupon.description}
           onChange={handleChange}
@@ -107,7 +107,7 @@ export default function AdminCoupons() {
           <input
             type="date"
             placeholder="Coupon Expires At"
-            className="w-full mt-1 p-2 border border-slate-200 dark:border-slate-700 outline-slate-400 dark:outline-slate-500 rounded-md bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
+            className="w-full mt-1 p-2 border border-slate-200 dark:border-slate-700 outline-none rounded-md bg-white dark:bg-slate-900"
             name="expiresAt"
             value={format(newCoupon.expiresAt, "yyyy-MM-dd")}
             onChange={handleChange}
@@ -116,7 +116,7 @@ export default function AdminCoupons() {
 
         <div className="mt-5">
           <div className="flex gap-2 mt-3">
-            <label className="relative inline-flex items-center cursor-pointer text-gray-900 dark:text-slate-200 gap-3">
+            <label className="relative inline-flex items-center cursor-pointer  gap-3">
               <input
                 type="checkbox"
                 className="sr-only peer"
@@ -126,13 +126,13 @@ export default function AdminCoupons() {
                   setNewCoupon({ ...newCoupon, forNewUser: e.target.checked })
                 }
               />
-              <div className="w-11 h-6 bg-slate-300 dark:bg-slate-600 rounded-full peer peer-checked:bg-green-600 transition-colors duration-200"></div>
+              <div className="w-11 h-6 bg-slate-300 dark:bg-slate-600 rounded-full peer peer-checked:bg-green-600 dark:peer-checked:bg-green-500 transition-colors duration-200"></div>
               <span className="dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
             </label>
             <p>For New User</p>
           </div>
           <div className="flex gap-2 mt-3">
-            <label className="relative inline-flex items-center cursor-pointer text-gray-900 dark:text-slate-200 gap-3">
+            <label className="relative inline-flex items-center cursor-pointer gap-3">
               <input
                 type="checkbox"
                 className="sr-only peer"
@@ -142,13 +142,13 @@ export default function AdminCoupons() {
                   setNewCoupon({ ...newCoupon, forMember: e.target.checked })
                 }
               />
-              <div className="w-11 h-6 bg-slate-300 dark:bg-slate-600 rounded-full peer peer-checked:bg-green-600 transition-colors duration-200"></div>
+              <div className="w-11 h-6 bg-slate-300 dark:bg-slate-600 rounded-full peer peer-checked:bg-green-600 dark:peer-checked:bg-green-500 transition-colors duration-200"></div>
               <span className="dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
             </label>
             <p>For Member</p>
           </div>
         </div>
-        <button className="mt-4 p-2 px-10 rounded bg-slate-700 dark:bg-slate-600 text-white active:scale-95 transition hover:bg-slate-800 dark:hover:bg-slate-500">
+        <button className="mt-4 py-2 px-10 rounded bg-slate-700 dark:bg-slate-600 text-white active:scale-95 transition hover:bg-slate-800 dark:hover:bg-slate-500">
           Add Coupon
         </button>
       </form>
@@ -194,7 +194,7 @@ export default function AdminCoupons() {
                   key={coupon.code}
                   className="hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
-                  <td className="py-3 px-4 font-medium text-slate-800 dark:text-slate-100">
+                  <td className="py-3 px-4 text-slate-800 dark:text-slate-100 font-medium">
                     {coupon.code}
                   </td>
                   <td className="py-3 px-4 text-slate-800 dark:text-slate-200">

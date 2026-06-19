@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import {
   HomeIcon,
-  LucideIcon,
   ShieldCheckIcon,
   StoreIcon,
   TicketPercentIcon,
@@ -12,16 +11,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { assets } from "@/assets/assets";
 
-interface SidebarLink {
-  name: string;
-  href: string;
-  icon: LucideIcon;
-}
-
 const AdminSidebar = () => {
   const pathname = usePathname();
 
-  const sidebarLinks: SidebarLink[] = [
+  const sidebarLinks = [
     { name: "Dashboard", href: "/admin", icon: HomeIcon },
     { name: "Stores", href: "/admin/stores", icon: StoreIcon },
     { name: "Approve Store", href: "/admin/approve", icon: ShieldCheckIcon },
@@ -46,7 +39,7 @@ const AdminSidebar = () => {
           <Link
             key={index}
             href={link.href}
-            className={`relative flex items-center gap-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 p-2.5 transition ${
+            className={`relative flex items-center gap-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 p-2.5 transition ${
               pathname === link.href &&
               "bg-slate-100 dark:bg-slate-800 sm:text-slate-600 dark:sm:text-slate-200"
             }`}

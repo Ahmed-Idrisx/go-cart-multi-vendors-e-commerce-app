@@ -3,19 +3,12 @@ import { usePathname } from "next/navigation";
 import {
   HomeIcon,
   LayoutListIcon,
-  LucideIcon,
   SquarePenIcon,
   SquarePlusIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Store } from "@/types/types";
-
-// interface SidebarLink {
-//   name: string;
-//   href: string;
-//   icon: LucideIcon;
-// }
 
 const StoreSidebar = ({ storeInfo }: { storeInfo: Store | null }) => {
   const pathname = usePathname();
@@ -38,7 +31,7 @@ const StoreSidebar = ({ storeInfo }: { storeInfo: Store | null }) => {
           <Image
             className="w-14 h-14 rounded-full shadow-md"
             src={storeInfo.logo}
-            alt=""
+            alt="store logo"
             width={80}
             height={80}
           />

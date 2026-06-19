@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import Loading from "@/components/Loading";
 import { orderDummyData } from "@/assets/assets";
 import { Order, OrderStatus } from "@/types/types";
+import Image from "next/image";
+import { XIcon } from "lucide-react";
 
 export default function StoreOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -91,8 +93,8 @@ export default function StoreOrders() {
                         {order.coupon?.code}
                       </span>
                     ) : (
-                      <span className="text-slate-400 dark:text-slate-500">
-                        no coupon
+                      <span className="flex justify-center text-slate-400 dark:text-slate-500">
+                        No Coupon
                       </span>
                     )}
                   </td>
@@ -110,7 +112,7 @@ export default function StoreOrders() {
                           e.target.value as OrderStatus,
                         )
                       }
-                      className="border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-md text-sm focus:ring focus:ring-blue-200 dark:focus:ring-blue-900"
+                      className="p-1 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-md text-sm focus:ring focus:ring-blue-200 dark:focus:ring-blue-00"
                     >
                       <option value="ORDER_PLACED">ORDER_PLACED</option>
                       <option value="PROCESSING">PROCESSING</option>
@@ -136,8 +138,16 @@ export default function StoreOrders() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-slate-900 rounded-lg shadow-lg max-w-2xl w-full p-6 relative border border-transparent dark:border-slate-700"
+            className=" bg-white dark:bg-slate-900 rounded-lg shadow-lg max-w-2xl w-full p-6 relative border border-transparent dark:border-slate-700"
           >
+            <button
+              type="button"
+              onClick={closeModal}
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+              aria-label="Close"
+            >
+              <XIcon size={24} />
+            </button>
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4 text-center">
               Order Details
             </h2>
@@ -192,10 +202,11 @@ export default function StoreOrders() {
                       className="flex items-center gap-4 border border-slate-100 dark:border-slate-700 shadow rounded p-2"
                     >
                       {imageSrc && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
+                        <Image
                           src={imageSrc}
                           alt={item.product?.name}
+                          width={64}
+                          height={64}
                           className="w-16 h-16 object-cover rounded"
                         />
                       )}

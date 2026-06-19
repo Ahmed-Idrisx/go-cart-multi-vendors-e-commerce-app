@@ -73,13 +73,13 @@ export default function StoreAddProduct() {
             <Image
               width={300}
               height={300}
-              className="h-15 w-auto border border-slate-200 dark:border-slate-700 rounded cursor-pointer bg-white dark:bg-slate-800"
+              className="h-15 w-auto border border-slate-200 dark:border-slate-700 rounded cursor-pointer"
               src={
                 images[key]
                   ? URL.createObjectURL(images[key] as File)
                   : assets.upload_area
               }
-              alt=""
+              alt="product image"
             />
             <input
               type="file"

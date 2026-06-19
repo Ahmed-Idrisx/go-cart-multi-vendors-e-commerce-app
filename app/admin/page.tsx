@@ -1,10 +1,8 @@
 "use client";
 import { dummyAdminDashboardData } from "@/assets/assets";
 import Loading from "@/components/Loading";
-
 import {
   CircleDollarSignIcon,
-  LucideIcon,
   ShoppingBasketIcon,
   StoreIcon,
   TagsIcon,
@@ -13,15 +11,7 @@ import { useEffect, useState } from "react";
 import { AdminDashboardData } from "@/types/types";
 import OrdersAreaChart from "@/components/admin/OrderAreaChart";
 
-interface DashboardCard {
-  title: string;
-  value: string;
-  icon: LucideIcon;
-}
-
 export default function AdminDashboard() {
-  const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || "$";
-
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<AdminDashboardData>({
     products: 0,
@@ -31,7 +21,7 @@ export default function AdminDashboard() {
     allOrders: [],
   });
 
-  const dashboardCardsData: DashboardCard[] = [
+  const dashboardCardsData = [
     {
       title: "Total Products",
       value: String(dashboardData.products),
@@ -39,7 +29,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Total Revenue",
-      value: currency + dashboardData.revenue,
+      value: "$" + dashboardData.revenue,
       icon: CircleDollarSignIcon,
     },
     {
@@ -79,13 +69,13 @@ export default function AdminDashboard() {
         {dashboardCardsData.map((card, index) => (
           <div
             key={index}
-            className="flex items-center gap-10 border border-slate-200 dark:border-slate-700 p-3 px-6 rounded-lg bg-white dark:bg-slate-900"
+            className="flex items-center gap-11 border border-slate-200 dark:border-slate-700 p-3 px-6 rounded-lg bg-white dark:bg-slate-900"
           >
             <div className="flex flex-col gap-3 text-xs">
               <p>{card.title}</p>
-              <b className="text-2xl font-medium text-slate-700 dark:text-slate-200">
+              <p className="text-2xl font-medium text-slate-700 dark:text-slate-200">
                 {card.value}
-              </b>
+              </p>
             </div>
             <card.icon
               size={50}
