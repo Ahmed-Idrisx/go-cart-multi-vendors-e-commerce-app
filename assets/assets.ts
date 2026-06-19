@@ -430,7 +430,7 @@ export const orderDummyData: Order[] = [
     createdAt: "2025-08-22T09:15:03.929Z",
     updatedAt: "2025-08-22T09:15:50.723Z",
     isCouponUsed: true,
-    coupon: dummyRatingsData[2],
+    coupon: couponDummyData[2],
     orderItems: [
       {
         orderId: "cmemm75h5001jtat89016h1p3",
@@ -457,8 +457,8 @@ export const orderDummyData: Order[] = [
     userId: "user_31dQbH27HVtovbs13X2cmqefddM",
     storeId: "cmemkqnzm000htat8u7n8cpte",
     addressId: "cmemm6g95001ftat8omv9b883",
-    isPaid: false,
-    paymentMethod: "COD",
+    isPaid: true,
+    paymentMethod: "STRIPE",
     createdAt: "2025-08-22T09:14:35.923Z",
     updatedAt: "2025-08-22T09:15:52.535Z",
     isCouponUsed: true,
