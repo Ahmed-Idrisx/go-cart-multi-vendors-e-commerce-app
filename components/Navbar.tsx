@@ -1,13 +1,16 @@
 "use client";
 
-import { Search, ShoppingCart, Heart } from "lucide-react";
+import { Search, ShoppingCart, Heart, Package2Icon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ThemeToggler } from "./ThemeToggler";
 import { useAppSelector } from "@/hooks/hooks";
+import { useClerk, UserButton, useUser } from "@clerk/nextjs";
 
 export default function Navbar() {
+  const { user } = useUser();
+  const { openSignIn } = useClerk();
   const router = useRouter();
   const [search, setSearch] = useState("");
   const cartCount = useAppSelector((state) => state.cart.total);
@@ -105,25 +108,61 @@ export default function Navbar() {
             >
               <ShoppingCart size={18} />
               Cart
-              <span className="absolute -top-1.5 left-3 text-[8px] text-white bg-green-600 size-3.5 rounded-full flex items-center justify-center font-bold">
+              <button className="absolute -top-1.5 left-3 text-[8px] text-white bg-green-600 size-3.5 rounded-full flex items-center justify-center font-bold">
                 {cartCount}
-              </span>
+              </button>
             </Link>
 
             <ThemeToggler />
-
-            <button className="px-6 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full font-medium">
-              Login
-            </button>
+            {!user ? (
+              <button
+                onClick={() => openSignIn()}
+                className="px-6 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full font-medium"
+              >
+                Login
+              </button>
+            ) : (
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    labelIcon={<Package2Icon size={16} />}
+                    label="My Orders"
+                    onClick={() => router.push("/orders")}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
+            )}
           </div>
 
           {/* Mobile User Button / Controls */}
           <div className="flex sm:hidden items-center gap-3">
             <ThemeToggler />
 
-            <button className="px-5 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-xs transition text-white rounded-full font-medium">
-              Login
-            </button>
+            {user ? (
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    labelIcon={<Heart size={16} />}
+                    label="wishlist"
+                    onClick={() => router.push("/wishlist")}
+                  />
+                  <UserButton.Action
+                    labelIcon={<ShoppingCart size={16} />}
+                    label="cart"
+                    onClick={() => router.push("/cart")}
+                  />
+                  <UserButton.Action
+                    labelIcon={<Package2Icon size={16} />}
+                    label="My Orders"
+                    onClick={() => router.push("/orders")}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
+            ) : (
+              <button className="px-5 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-xs transition text-white rounded-full font-medium">
+                Login
+              </button>
+            )}
           </div>
         </div>
       </div>
