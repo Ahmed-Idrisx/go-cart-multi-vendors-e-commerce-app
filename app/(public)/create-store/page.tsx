@@ -59,7 +59,7 @@ export default function CreateStore() {
     setLoading(false);
   };
 
-  const onSubmitHandler = async (e) => {
+  const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Logic to submit the store details
   };
