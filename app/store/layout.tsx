@@ -5,6 +5,7 @@ import { SignIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
+import prisma from "@/lib/prisma";
 
 export const metadata = {
   title: "GoCart. - Store Dashboard",
@@ -24,7 +25,7 @@ export default async function RootAdminLayout({
       </div>
     );
   }
-  const isSeller = await authSeller(userId as string);
+  const isSeller = await authSeller(userId);
   if (!isSeller) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-6 bg-white dark:bg-slate-950">
@@ -40,12 +41,18 @@ export default async function RootAdminLayout({
       </div>
     );
   }
+  const storeInfo = await prisma.store.findUnique({
+    where: {
+      userId: userId,
+    },
+  });
+
   return (
     <>
       <div className="flex flex-col h-screen bg-white dark:bg-slate-950">
         <SellerNavbar />
         <div className="flex flex-1 items-start h-full overflow-y-scroll no-scrollbar">
-          <SellerSidebar />
+          <SellerSidebar storeInfo={storeInfo} />
           <div className="flex-1 h-full p-5 lg:pl-12 lg:pt-12 overflow-y-scroll">
             {children}
           </div>

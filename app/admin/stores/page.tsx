@@ -6,10 +6,18 @@ import authAdmin from "@/middlewares/authAdmin";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowRightIcon } from "lucide-react";
+import { SignIn } from "@clerk/nextjs";
 
 export default async function AdminStores() {
   const { userId } = await auth();
-  const isAdmin = await authAdmin(userId as string);
+  if (!userId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <SignIn fallbackRedirectUrl="/store" routing="hash" />
+      </div>
+    );
+  }
+  const isAdmin = await authAdmin(userId);
 
   if (!isAdmin) {
     return (

@@ -1,30 +1,42 @@
-"use client";
-import { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
 import Image from "next/image";
-import Loading from "@/components/Loading";
-import { productDummyData } from "@/assets/assets";
-import { Product } from "@/types/types";
 import Link from "next/link";
+import ToggleAvailableProduct from "@/components/store/ToggleAvailableProduct";
+import { auth } from "@clerk/nextjs/server";
+import authSeller from "@/middlewares/authSeller";
+import prisma from "@/lib/prisma";
+import { SignIn } from "@clerk/nextjs";
+import { ArrowRightIcon } from "lucide-react";
 
-export default function StoreManageProducts() {
-  const [loading, setLoading] = useState(true);
-  const [products, setProducts] = useState<Product[]>([]);
-
-  const fetchProducts = async () => {
-    setProducts(productDummyData);
-    setLoading(false);
-  };
-
-  const toggleStock = async (productId: string) => {
-    // Logic to toggle the stock of a product
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  if (loading) return <Loading />;
+export default async function StoreManageProducts() {
+  const { userId } = await auth();
+  if (!userId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <SignIn fallbackRedirectUrl="/store" routing="hash" />
+      </div>
+    );
+  }
+  const storeId = await authSeller(userId);
+  if (!storeId) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-6 bg-white dark:bg-slate-950">
+        <h1 className="text-2xl sm:text-4xl font-semibold text-slate-400 dark:text-slate-500">
+          You are not authorized to access this page
+        </h1>
+        <Link
+          href="/"
+          className="bg-slate-700 dark:bg-slate-600 text-white flex items-center gap-2 mt-8 py-2 px-6 max-sm:text-sm rounded-full hover:bg-slate-800 dark:hover:bg-slate-500 transition"
+        >
+          Go to home <ArrowRightIcon size={18} />
+        </Link>
+      </div>
+    );
+  }
+  const products = await prisma.product.findMany({
+    where: {
+      storeId,
+    },
+  });
 
   return (
     <>
@@ -73,15 +85,9 @@ export default function StoreManageProducts() {
               <td className="px-4 py-3">$ {product.price.toLocaleString()}</td>
               <td className="px-4 py-3 text-center">
                 <label className="relative inline-flex items-center cursor-pointer ">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    onChange={() =>
-                      toast.promise(toggleStock(product.id), {
-                        loading: "Updating data...",
-                      })
-                    }
-                    checked={product.inStock}
+                  <ToggleAvailableProduct
+                    productId={product.id}
+                    inStock={product.inStock}
                   />
                   <div className="w-9 h-5 bg-slate-300  rounded-full peer peer-checked:bg-green-600 transition-colors duration-200"></div>
                   <span className="dot absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-4"></span>

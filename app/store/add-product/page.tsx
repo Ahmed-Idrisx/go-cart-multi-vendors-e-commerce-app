@@ -21,7 +21,7 @@ export default function StoreAddProduct() {
     "Hobbies & Crafts",
     "Others",
   ];
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [images, setImages] = useState<ImageSlots>({
     1: null,
     2: null,
@@ -35,12 +35,12 @@ export default function StoreAddProduct() {
     price: 0,
     category: "",
   });
-  const [loading, setLoading] = useState(false);
 
   const onChangeHandler = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
+
     setProductInfo((prev) => ({
       ...prev,
       [name]: name === "mrp" || name === "price" ? Number(value) : value,
@@ -49,14 +49,56 @@ export default function StoreAddProduct() {
 
   const onSubmitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Logic to add a product
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading("Submitting data...");
+
+    try {
+      const formData = new FormData();
+      formData.append("name", productInfo.name);
+      formData.append("description", productInfo.description);
+      formData.append("mrp", String(productInfo.mrp));
+      formData.append("price", String(productInfo.price));
+      formData.append("category", productInfo.category);
+
+      // Append only non-null images under the key "images"
+      (Object.values(images) as (File | null)[]).forEach((file) => {
+        if (file) formData.append("images", file);
+      });
+
+      const response = await fetch("/api/store/product", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to add product");
+      }
+
+      toast.success(data.message, { id: loadingToastId });
+
+      // Reset form
+      setProductInfo({
+        name: "",
+        description: "",
+        mrp: 0,
+        price: 0,
+        category: "",
+      });
+      setImages({ 1: null, 2: null, 3: null, 4: null });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Something went wrong";
+      toast.error(message, { id: loadingToastId });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <form
-      onSubmit={(e) =>
-        toast.promise(onSubmitHandler(e), { loading: "Adding Product..." })
-      }
+      onSubmit={onSubmitHandler}
       className="text-slate-500 dark:text-slate-400 mb-28"
     >
       <h1 className="text-2xl">
@@ -169,7 +211,8 @@ export default function StoreAddProduct() {
       <br />
 
       <button
-        disabled={loading}
+        type="submit"
+        disabled={isSubmitting}
         className="bg-slate-800 dark:bg-slate-700 text-white px-6 mt-7 py-2 hover:bg-slate-900 dark:hover:bg-slate-600 rounded transition disabled:opacity-50"
       >
         Add Product
