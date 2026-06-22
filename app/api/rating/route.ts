@@ -6,7 +6,7 @@ interface AddRatingBody {
   orderId: string;
   productId: string;
   rating: number;
-  review?: string;
+  review: string;
 }
 
 // Add new rating
