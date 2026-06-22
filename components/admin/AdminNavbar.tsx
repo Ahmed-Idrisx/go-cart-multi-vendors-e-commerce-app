@@ -1,8 +1,10 @@
-"use client";
 import Link from "next/link";
 import { ThemeToggler } from "../ThemeToggler";
+import { UserButton } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 
-const AdminNavbar = () => {
+const AdminNavbar = async () => {
+  const user = await currentUser();
   return (
     <div className="flex items-center justify-between px-2 py-3 sm:px-12 sm:py-3 border-b border-slate-200 dark:border-slate-800 transition-all">
       <Link
@@ -28,7 +30,8 @@ const AdminNavbar = () => {
       </Link>
       <div className="flex items-center gap-3 text-slate-700 dark:text-slate-200 space-x-1">
         <ThemeToggler />
-        <p>Hi, Admin</p>
+        {user?.firstName ?? "Admin"}
+        <UserButton />
       </div>
     </div>
   );

@@ -1,59 +1,74 @@
-"use client";
-import { dummyAdminDashboardData } from "@/assets/assets";
-import Loading from "@/components/Loading";
 import {
+  ArrowRightIcon,
   CircleDollarSignIcon,
   ShoppingBasketIcon,
   StoreIcon,
   TagsIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { AdminDashboardData } from "@/types/types";
 import OrdersAreaChart from "@/components/admin/OrderAreaChart";
+import { auth } from "@clerk/nextjs/server";
+import authAdmin from "@/middlewares/authAdmin";
+import prisma from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 
-export default function AdminDashboard() {
-  const [loading, setLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState<AdminDashboardData>({
-    products: 0,
-    revenue: "0",
-    orders: 0,
-    stores: 0,
-    allOrders: [],
+export default async function AdminDashboard() {
+  const { userId } = await auth();
+  if (!userId) {
+    redirect("/sign-in");
+  }
+  const isAdmin = await authAdmin(userId);
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-6 bg-white dark:bg-slate-950">
+        <h1 className="text-2xl sm:text-4xl font-semibold text-slate-400 dark:text-slate-500">
+          You are not authorized to access this page
+        </h1>
+        <Link
+          href="/"
+          className="bg-slate-700 dark:bg-slate-600 text-white flex items-center gap-2 mt-8 py-2 px-6 max-sm:text-sm rounded-full hover:bg-slate-800 dark:hover:bg-slate-500 transition"
+        >
+          Go to home <ArrowRightIcon size={18} />
+        </Link>
+      </div>
+    );
+  }
+  const [orders, stores, allOrders, products] = await Promise.all([
+    prisma.order.count(),
+    prisma.store.count(),
+    prisma.order.findMany({ select: { createdAt: true, total: true } }),
+    prisma.product.count(),
+  ]);
+
+  let totalRevenue = 0;
+  allOrders.forEach((order) => {
+    totalRevenue += order.total;
   });
+  const revenue = totalRevenue.toFixed(2);
 
   const dashboardCardsData = [
     {
       title: "Total Products",
-      value: String(dashboardData.products),
+      value: String(products),
       icon: ShoppingBasketIcon,
     },
     {
       title: "Total Revenue",
-      value: "$" + dashboardData.revenue,
+      value: "$" + revenue,
       icon: CircleDollarSignIcon,
     },
     {
       title: "Total Orders",
-      value: String(dashboardData.orders),
+      value: String(orders),
       icon: TagsIcon,
     },
     {
       title: "Total Stores",
-      value: String(dashboardData.stores),
+      value: String(stores),
       icon: StoreIcon,
     },
   ];
-
-  const fetchDashboardData = async () => {
-    setDashboardData(dummyAdminDashboardData);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  if (loading) return <Loading />;
 
   return (
     <div className="text-slate-500 dark:text-slate-400">
@@ -86,7 +101,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Area Chart */}
-      <OrdersAreaChart allOrders={dashboardData.allOrders} />
+      <OrdersAreaChart allOrders={allOrders} />
     </div>
   );
 }

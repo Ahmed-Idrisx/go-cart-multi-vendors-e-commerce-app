@@ -1,4 +1,5 @@
 import my_logo from "./my-logo.png";
+import default_avatar from "./default-avatar.png";
 import happy_store from "./happy_store.webp";
 import upload_area from "./upload_area.svg";
 import hero_model_img from "./hero_model_img.png";
@@ -39,6 +40,7 @@ export const assets: Record<string, StaticImageData> = {
   hero_product_img1,
   hero_product_img2,
   my_logo,
+  default_avatar,
   product_img1,
   product_img2,
   product_img3,

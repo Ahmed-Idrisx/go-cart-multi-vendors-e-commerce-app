@@ -8,10 +8,12 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Store } from "@/types/types";
+import { useUser } from "@clerk/nextjs";
+import { assets } from "@/assets/assets";
 
-const StoreSidebar = ({ storeInfo }: { storeInfo: Store | null }) => {
+const StoreSidebar = () => {
   const pathname = usePathname();
+  const { user } = useUser();
 
   const sidebarLinks = [
     { name: "Dashboard", href: "/store", icon: HomeIcon },
@@ -27,16 +29,17 @@ const StoreSidebar = ({ storeInfo }: { storeInfo: Store | null }) => {
   return (
     <div className="inline-flex h-full flex-col gap-5 border-r border-slate-200 dark:border-slate-800 sm:min-w-60 bg-white dark:bg-slate-950">
       <div className="flex flex-col gap-3 justify-center items-center pt-8 max-sm:hidden">
-        {storeInfo?.logo && (
-          <Image
-            className="w-14 h-14 rounded-full shadow-md"
-            src={storeInfo.logo}
-            alt="store logo"
-            width={80}
-            height={80}
-          />
-        )}
-        <p className="text-slate-700 dark:text-slate-200">{storeInfo?.name}</p>
+        <Image
+          className="w-14 h-14 rounded-full shadow-md"
+          src={user?.imageUrl ?? assets.default_avatar}
+          alt="store logo"
+          width={80}
+          height={80}
+        />
+
+        <p className="text-slate-700 dark:text-slate-200">
+          {user?.firstName ?? "Seller"}
+        </p>
       </div>
 
       <div className="max-sm:mt-6">

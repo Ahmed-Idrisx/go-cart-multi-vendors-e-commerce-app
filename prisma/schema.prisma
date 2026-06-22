@@ -142,6 +142,11 @@ model Coupon {
 }
 
 // Required for creating a Store: userId, name, username, email, contact, logo, description, address (optional: , status, isActive)
+enum StoreStatus {
+  pending
+  approved
+  rejected
+}
 model Store {
     id          String   @id @default(cuid())
     userId      String   @unique
@@ -149,7 +154,7 @@ model Store {
     description String
     username    String   @unique
     address     String
-    status      String   @default("pending")
+    status      StoreStatus   @default(pending)
     isActive    Boolean  @default(false)
     logo        String
     email       String

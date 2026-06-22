@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { StaticImageData } from "next/image";
 
 /* ============================================================ */
@@ -53,7 +54,7 @@ export interface User {
   name: string;
   email: string;
   image: ImageSource;
-  cart?: Cart;
+  cart?: Prisma.JsonValue;
 }
 
 /** Trimmed-down User, used wherever only name/image are embedded (e.g. inside a Rating) */
