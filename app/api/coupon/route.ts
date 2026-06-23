@@ -10,6 +10,9 @@ interface VerifyCouponBody {
 export async function POST(request: NextRequest) {
   try {
     const { userId, has } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const { code } = (await request.json()) as VerifyCouponBody;
 
     if (!code) {
@@ -38,8 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if coupon has expired
-    const now = new Date();
-    if (coupon.expiresAt < now) {
+    if (coupon.expiresAt < new Date()) {
       return NextResponse.json(
         { error: "Coupon has expired" },
         { status: 400 },
@@ -48,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     if (coupon.forNewUser) {
       const userOrders = await prisma.order.findMany({
-        where: { userId: userId as string },
+        where: { userId: userId },
       });
       if (userOrders.length > 0) {
         return NextResponse.json(

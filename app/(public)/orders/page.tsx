@@ -1,21 +1,45 @@
-"use client";
-// import { Metadata } from "next";
+import { Metadata } from "next";
 import PageTitle from "@/components/PageTitle";
-import { orderDummyData } from "@/assets/assets";
 import OrderItem from "@/components/OrderItem";
-import { useEffect, useState } from "react";
-import { Order } from "@/types/types";
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import prisma from "@/lib/prisma";
+import { PaymentMethod } from "@prisma/client";
+import { Coupon, Order } from "@/types/types";
 
-// export const metadata: Metadata = {
-//   title: "My Orders",
-//   description: "View and track your orders.",
-// };
+export const metadata: Metadata = {
+  title: "My Orders",
+  description: "View and track your orders.",
+};
 
-export default function Orders() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  useEffect(() => {
-    setOrders(orderDummyData);
-  }, []);
+export default async function Orders() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    if (!userId) {
+      redirect("/sign-in");
+    }
+  }
+
+  const rawOrders = await prisma.order.findMany({
+    where: {
+      userId,
+      OR: [
+        { paymentMethod: PaymentMethod.COD },
+        { AND: [{ paymentMethod: PaymentMethod.STRIPE }, { isPaid: true }] },
+      ],
+    },
+    include: {
+      orderItems: { include: { product: true } },
+      address: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const orders = rawOrders.map((order) => ({
+    ...order,
+    coupon: (order.coupon as Coupon | null) ?? undefined,
+  })) as Order[];
 
   if (orders.length <= 0) {
     return (

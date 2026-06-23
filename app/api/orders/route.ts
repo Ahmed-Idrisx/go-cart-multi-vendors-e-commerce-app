@@ -3,10 +3,10 @@ import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { PaymentMethod, type Coupon } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-// import Stripe from "stripe";
+import Stripe from "stripe";
 
 interface OrderItemInput {
-  id: string;
+  productId: string;
   quantity: number;
 }
 
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     >();
     for (const item of items) {
       const product = await prisma.product.findUnique({
-        where: { id: item.id },
+        where: { id: item.productId },
       });
       if (!product) continue;
       const storeId = product.storeId;
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       ordersByStore.get(storeId)!.push({ ...item, price: product.price });
     }
     const orderIds: string[] = [];
-    // let fullAmount = 0;
+    let fullAmount = 0;
     let isShippingFreeAdded = false;
     // create orders for each seller
     for (const [storeId, sellerItems] of ordersByStore.entries()) {
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
         isShippingFreeAdded = true;
       }
 
-      // fullAmount += parseFloat(total.toFixed(2));
+      fullAmount += parseFloat(total.toFixed(2));
 
       const order = await prisma.order.create({
         data: {
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
           coupon: coupon ? (coupon as object) : {},
           orderItems: {
             create: sellerItems.map((item) => ({
-              productId: item.id,
+              productId: item.productId,
               quantity: item.quantity,
               price: item.price,
             })),
@@ -134,35 +134,35 @@ export async function POST(request: NextRequest) {
 
       orderIds.push(order.id);
     }
-    // if (paymentMethod === "STRIPE") {
-    //   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-    //   const origin = request.headers.get("origin");
-    //   const session = await stripe.checkout.sessions.create({
-    //     payment_method_types: ["card"],
-    //     line_items: [
-    //       {
-    //         price_data: {
-    //           currency: "usd",
-    //           product_data: {
-    //             name: "Order",
-    //           },
-    //           unit_amount: Math.round(fullAmount * 100),
-    //         },
-    //         quantity: 1,
-    //       },
-    //     ],
-    //     expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes from now
-    //     mode: "payment",
-    //     success_url: `${origin}/loading?nextUrl=orders`,
-    //     cancel_url: `${origin}/cart`,
-    //     metadata: {
-    //       orderIds: orderIds.join(","),
-    //       userId,
-    //       appId: "gocart",
-    //     },
-    //   });
-    //   return NextResponse.json({ session });
-    // }
+    if (paymentMethod === "STRIPE") {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+      const origin = request.headers.get("origin");
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: "Order",
+              },
+              unit_amount: Math.round(fullAmount * 100),
+            },
+            quantity: 1,
+          },
+        ],
+        expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes from now
+        mode: "payment",
+        success_url: `${origin}/orders`,
+        cancel_url: `${origin}/cart`,
+        metadata: {
+          orderIds: orderIds.join(","),
+          userId,
+          appId: "go-cart-multi-vendors-e-commerce",
+        },
+      });
+      return NextResponse.json({ session });
+    }
     // clear the cart
     await prisma.user.update({
       where: { id: userId },

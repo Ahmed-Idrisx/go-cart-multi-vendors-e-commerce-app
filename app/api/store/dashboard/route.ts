@@ -7,7 +7,13 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const { userId } = await auth();
-    const storeId = await authSeller(userId as string);
+    if (!userId) {
+      return NextResponse.json(
+        { error: "you are not authorized" },
+        { status: 401 },
+      );
+    }
+    const storeId = await authSeller(userId);
 
     // get all orders for the seller
     const orders = await prisma.order.findMany({

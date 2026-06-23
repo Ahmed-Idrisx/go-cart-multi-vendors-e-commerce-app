@@ -1,3 +1,4 @@
+import AppInitializer from "@/components/AppInitializer";
 import Banner from "@/components/Banner";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
@@ -11,6 +12,7 @@ export default function PublicLayout({
     <>
       <Banner />
       <Navbar />
+      <AppInitializer />
       {children}
       <Footer />
     </>

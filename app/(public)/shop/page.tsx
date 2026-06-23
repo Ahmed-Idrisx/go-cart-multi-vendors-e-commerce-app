@@ -1,18 +1,26 @@
-"use client";
 import ProductCard from "@/components/ProductCard";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/hooks/hooks";
 import { Suspense } from "react";
 import { MoveLeftIcon } from "lucide-react";
+import prisma from "@/lib/prisma";
+import Link from "next/link";
 
-const ShopContent = () => {
+const ShopContent = async ({ search }: { search: string }) => {
   // get query params ?search=abc
-  const searchParams = useSearchParams();
-  const search = searchParams.get("search");
-  const router = useRouter();
+  let products = await prisma.product.findMany({
+    where: { inStock: true },
+    include: {
+      rating: {
+        include: {
+          user: { select: { name: true, image: true } },
+        },
+      },
+      store: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  // remove products with store isActive false
+  products = products.filter((products) => products.store.isActive);
 
-  const products = useAppSelector((state) => state.product.list);
   const filteredProducts = search
     ? products.filter((product) => product.name.toLowerCase().includes(search))
     : products;
@@ -21,11 +29,12 @@ const ShopContent = () => {
     <div className="min-h-[70vh] mx-6">
       <div className=" max-w-7xl mx-auto">
         <h1
-          onClick={() => router.push("/shop")}
           className={`text-2xl text-slate-500 my-6 flex items-center gap-2 ${search && "cursor-pointer"}`}
         >
-          {search && <MoveLeftIcon size={20} />}All{" "}
-          <span className="text-slate-700 font-medium">Products</span>
+          <Link href={"/shop"}>
+            {search && <MoveLeftIcon size={20} />}All{" "}
+            <span className="text-slate-700 font-medium">Products</span>
+          </Link>
         </h1>
         <div className="grid grid-cols-2  sm:flex flex-wrap justify-center gap-6 xl:gap-12 mx-auto mb-32">
           {filteredProducts.map((product) => (
@@ -36,7 +45,12 @@ const ShopContent = () => {
     </div>
   );
 };
-const Shop = () => {
+const Shop = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ search: string }>;
+}) => {
+  const { search } = await searchParams;
   return (
     <Suspense
       fallback={
@@ -45,7 +59,7 @@ const Shop = () => {
         </div>
       }
     >
-      <ShopContent />
+      <ShopContent search={search} />
     </Suspense>
   );
 };

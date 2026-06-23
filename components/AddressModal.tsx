@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { XIcon } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useAppDispatch } from "@/hooks/hooks";
+import { addAddress } from "@/lib/features/address/addressSlice";
 
 interface AddressModalProps {
   setShowAddressModal: (show: boolean) => void;
@@ -11,6 +13,8 @@ interface AddressModalProps {
 export default function AddressModal({
   setShowAddressModal,
 }: AddressModalProps) {
+  const dispatch = useAppDispatch();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [address, setAddress] = useState({
     name: "",
     email: "",
@@ -31,23 +35,34 @@ export default function AddressModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading("Adding address...");
+    try {
+      const res = await fetch("/api/address", {
+        method: "POST",
+        body: JSON.stringify({ address }),
+      });
+      const data = await res.json();
 
-    setShowAddressModal(false);
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+      dispatch(addAddress(data.newAddress));
+      toast.success(data.message, { id: loadingToastId });
+      setShowAddressModal(false);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Something went wrong";
+      toast.error(message, { id: loadingToastId });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 dark:bg-black/60 backdrop-blur-sm h-screen flex items-center justify-center">
       <form
-        onSubmit={(e) =>
-          toast.promise(handleSubmit(e), {
-            loading: "Adding Address...",
-            success: "Address saved!",
-            error: (err) =>
-              err.response?.data?.message ||
-              err.message ||
-              "Failed to save address",
-          })
-        }
+        onSubmit={handleSubmit}
         className="flex flex-col gap-5 text-slate-700 dark:text-slate-200 w-full max-w-md mx-6 bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl border border-gray-150 dark:border-slate-700 relative"
       >
         <button
@@ -139,8 +154,12 @@ export default function AddressModal({
           placeholder="Phone"
           required
         />
-        <button className="bg-slate-800 dark:bg-green-600 hover:bg-slate-900 dark:hover:bg-green-700 text-white text-sm font-semibold py-3 rounded-md active:scale-95 transition-all shadow-md mt-2">
-          SAVE ADDRESS
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="bg-slate-800 dark:bg-green-600 hover:bg-slate-900 dark:hover:bg-green-700 text-white text-sm font-semibold py-3 rounded-md active:scale-95 transition-all shadow-md mt-2"
+        >
+          {isSubmitting ? "SAVING..." : "SAVE ADDRESS"}
         </button>
       </form>
     </div>

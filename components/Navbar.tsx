@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ThemeToggler } from "./ThemeToggler";
 import { useAppSelector } from "@/hooks/hooks";
-import { useClerk, UserButton, useUser } from "@clerk/nextjs";
+import { useClerk, UserButton, useUser, Protect } from "@clerk/nextjs";
 
 export default function Navbar() {
   const { user } = useUser();
@@ -30,9 +30,11 @@ export default function Navbar() {
           >
             <span className="text-green-600">Go</span>Cart
             <span className="text-green-600 text-5xl leading-none">.</span>
-            <span className="absolute text-xs font-semibold -top-1 -right-8 px-3 p-0.5 rounded-full flex items-center gap-2 text-white bg-green-500">
-              plus
-            </span>
+            <Protect plan="plus">
+              <span className="absolute text-xs font-semibold -top-1 -right-8 px-3 p-0.5 rounded-full flex items-center gap-2 text-white bg-green-500">
+                plus
+              </span>
+            </Protect>
           </Link>
           {/* Mobile User Logo */}
           <Link
@@ -41,9 +43,11 @@ export default function Navbar() {
           >
             <span className="text-green-600">G</span>C
             <span className="text-green-600 text-5xl leading-none">.</span>
-            <span className="absolute text-xs font-semibold -top-1 -right-8 px-3 p-0.5 rounded-full flex items-center gap-2 text-white bg-green-500">
-              plus
-            </span>
+            <Protect plan="plus">
+              <span className="absolute text-xs font-semibold -top-1 -right-8 px-3 p-0.5 rounded-full flex items-center gap-2 text-white bg-green-500">
+                plus
+              </span>
+            </Protect>
           </Link>
 
           {/* Desktop Menu */}

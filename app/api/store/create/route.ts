@@ -131,7 +131,7 @@ export async function GET() {
     }
     const store = await prisma.store.findFirst({
       where: {
-        userId: userId as string,
+        userId: userId,
       },
     });
     if (store) {

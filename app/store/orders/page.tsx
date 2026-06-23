@@ -1,277 +1,47 @@
-"use client";
-import { useEffect, useState } from "react";
-import Loading from "@/components/Loading";
-import { orderDummyData } from "@/assets/assets";
-import { Order, OrderStatus } from "@/types/types";
-import Image from "next/image";
-import { XIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
+import StoreOrders from "@/components/store/StoreOrders";
+import { auth } from "@clerk/nextjs/server";
+import authSeller from "@/middlewares/authSeller";
+import { SignIn } from "@clerk/nextjs";
+import Link from "next/link";
+import prisma from "@/lib/prisma";
+import { Order } from "@/types/types";
 
-export default function StoreOrders() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const fetchOrders = async () => {
-    setOrders(orderDummyData);
-    setLoading(false);
-  };
-
-  const updateOrderStatus = async (orderId: string, status: OrderStatus) => {
-    // Logic to update the status of an order
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, status } : order,
-      ),
+export default async function StoreOrdersPage() {
+  const { userId } = await auth();
+  if (!userId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <SignIn fallbackRedirectUrl="/store" routing="hash" />
+      </div>
     );
-  };
-
-  const openModal = (order: Order) => {
-    setSelectedOrder(order);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setSelectedOrder(null);
-    setIsModalOpen(false);
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  if (loading) return <Loading />;
-
-  return (
-    <>
-      <h1 className="text-2xl text-slate-500 dark:text-slate-400 mb-5">
-        Store{" "}
-        <span className="text-slate-800 dark:text-slate-100 font-medium">
-          Orders
-        </span>
-      </h1>
-      {orders.length === 0 ? (
-        <p className="text-slate-500 dark:text-slate-400">No orders found</p>
-      ) : (
-        <div className="overflow-x-auto max-w-4xl rounded-md shadow border border-gray-200 dark:border-slate-700">
-          <table className="w-full text-sm text-left text-gray-600 dark:text-slate-300">
-            <thead className="bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">
-              <tr>
-                {[
-                  "Sr. No.",
-                  "Customer",
-                  "Total",
-                  "Payment",
-                  "Coupon",
-                  "Status",
-                  "Date",
-                ].map((heading, i) => (
-                  <th key={i} className="px-4 py-3">
-                    {heading}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-700 bg-white dark:bg-slate-900">
-              {orders.map((order, index) => (
-                <tr
-                  key={order.id}
-                  className="hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors duration-150 cursor-pointer"
-                  onClick={() => openModal(order)}
-                >
-                  <td className="pl-6 text-green-600 dark:text-green-400">
-                    {index + 1}
-                  </td>
-                  <td className="px-4 py-3">{order.user?.name}</td>
-                  <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-100">
-                    ${order.total}
-                  </td>
-                  <td className="px-4 py-3">{order.paymentMethod}</td>
-                  <td className="px-4 py-3">
-                    {order.isCouponUsed ? (
-                      <span className="bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400 text-xs px-2 py-1 rounded-full">
-                        {order.coupon?.code}
-                      </span>
-                    ) : (
-                      <span className="flex justify-center text-slate-400 dark:text-slate-500">
-                        No Coupon
-                      </span>
-                    )}
-                  </td>
-                  <td
-                    className="px-4 py-3"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                  >
-                    <select
-                      value={order.status}
-                      onChange={(e) =>
-                        updateOrderStatus(
-                          order.id,
-                          e.target.value as OrderStatus,
-                        )
-                      }
-                      className="p-1 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-md text-sm focus:ring focus:ring-blue-200 dark:focus:ring-blue-00"
-                    >
-                      <option value="ORDER_PLACED">ORDER_PLACED</option>
-                      <option value="PROCESSING">PROCESSING</option>
-                      <option value="SHIPPED">SHIPPED</option>
-                      <option value="DELIVERED">DELIVERED</option>
-                    </select>
-                  </td>
-                  <td className="px-4 py-3 text-gray-500 dark:text-slate-400">
-                    {new Date(order.createdAt).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Modal */}
-      {isModalOpen && selectedOrder && (
-        <div
-          onClick={closeModal}
-          className="fixed inset-0 flex items-center justify-center bg-black/50 text-slate-700 dark:text-slate-200 text-sm backdrop-blur-xs z-50"
+  }
+  const storeId = await authSeller(userId);
+  if (!storeId) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-6 bg-white dark:bg-slate-950">
+        <h1 className="text-2xl sm:text-4xl font-semibold text-slate-400 dark:text-slate-500">
+          You are not authorized to access this page
+        </h1>
+        <Link
+          href="/"
+          className="bg-slate-700 dark:bg-slate-600 text-white flex items-center gap-2 mt-8 py-2 px-6 max-sm:text-sm rounded-full hover:bg-slate-800 dark:hover:bg-slate-500 transition"
         >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className=" bg-white dark:bg-slate-900 rounded-lg shadow-lg max-w-2xl w-full p-6 relative border border-transparent dark:border-slate-700"
-          >
-            <button
-              type="button"
-              onClick={closeModal}
-              className="absolute top-4 right-4 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
-              aria-label="Close"
-            >
-              <XIcon size={24} />
-            </button>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4 text-center">
-              Order Details
-            </h2>
+          Go to home <ArrowRightIcon size={18} />
+        </Link>
+      </div>
+    );
+  }
 
-            {/* Customer Details */}
-            <div className="mb-4">
-              <h3 className="font-semibold mb-2 text-slate-800 dark:text-slate-100">
-                Customer Details
-              </h3>
-              <p>
-                <span className="text-green-700 dark:text-green-400">
-                  Name:
-                </span>{" "}
-                {selectedOrder.user?.name}
-              </p>
-              <p>
-                <span className="text-green-700 dark:text-green-400">
-                  Email:
-                </span>{" "}
-                {selectedOrder.user?.email}
-              </p>
-              <p>
-                <span className="text-green-700 dark:text-green-400">
-                  Phone:
-                </span>{" "}
-                {selectedOrder.address?.phone}
-              </p>
-              <p>
-                <span className="text-green-700 dark:text-green-400">
-                  Address:
-                </span>{" "}
-                {`${selectedOrder.address?.street}, ${selectedOrder.address?.city}, ${selectedOrder.address?.state}, ${selectedOrder.address?.zip}, ${selectedOrder.address?.country}`}
-              </p>
-            </div>
+  const orders = (await prisma.order.findMany({
+    where: { storeId: storeId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: true,
+      address: true,
+      orderItems: { include: { product: true } },
+    },
+  })) as unknown as Order[];
 
-            {/* Products */}
-            <div className="mb-4">
-              <h3 className="font-semibold mb-2 text-slate-800 dark:text-slate-100">
-                Products
-              </h3>
-              <div className="space-y-2">
-                {selectedOrder.orderItems.map((item, i) => {
-                  const firstImage = item.product.images?.[0];
-                  const imageSrc =
-                    typeof firstImage === "string"
-                      ? firstImage
-                      : firstImage?.src;
-
-                  return (
-                    <div
-                      key={i}
-                      className="flex items-center gap-4 border border-slate-100 dark:border-slate-700 shadow rounded p-2"
-                    >
-                      {imageSrc && (
-                        <Image
-                          src={imageSrc}
-                          alt={item.product?.name}
-                          width={64}
-                          height={64}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      )}
-                      <div className="flex-1">
-                        <p className="text-slate-800 dark:text-slate-100">
-                          {item.product?.name}
-                        </p>
-                        <p>Qty: {item.quantity}</p>
-                        <p>Price: ${item.price}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Payment & Status */}
-            <div className="mb-4">
-              <p>
-                <span className="text-green-700 dark:text-green-400">
-                  Payment Method:
-                </span>{" "}
-                {selectedOrder.paymentMethod}
-              </p>
-              <p>
-                <span className="text-green-700 dark:text-green-400">
-                  Paid:
-                </span>{" "}
-                {selectedOrder.isPaid ? "Yes" : "No"}
-              </p>
-              {selectedOrder.isCouponUsed && selectedOrder.coupon && (
-                <p>
-                  <span className="text-green-700 dark:text-green-400">
-                    Coupon:
-                  </span>{" "}
-                  {selectedOrder.coupon.code} ({selectedOrder.coupon.discount}%
-                  off)
-                </p>
-              )}
-              <p>
-                <span className="text-green-700 dark:text-green-400">
-                  Status:
-                </span>{" "}
-                {selectedOrder.status}
-              </p>
-              <p>
-                <span className="text-green-700 dark:text-green-400">
-                  Order Date:
-                </span>{" "}
-                {new Date(selectedOrder.createdAt).toLocaleString()}
-              </p>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-end">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded hover:bg-slate-300 dark:hover:bg-slate-600"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
+  return <StoreOrders storeOrders={orders} />;
 }

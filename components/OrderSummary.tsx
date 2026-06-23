@@ -5,8 +5,10 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Address, Coupon, PaymentMethod, Product } from "@/types/types";
-import { useAppSelector } from "@/hooks/hooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import AddressModal from "./AddressModal";
+import { Protect, useUser } from "@clerk/nextjs";
+import { fetchCart } from "@/lib/features/cart/cartSlice";
 
 interface OrderSummaryProps {
   totalPrice: number;
@@ -14,6 +16,8 @@ interface OrderSummaryProps {
 }
 
 export default function OrderSummary({ totalPrice, items }: OrderSummaryProps) {
+  const { user } = useUser();
+  const dispatch = useAppDispatch();
   const router = useRouter();
 
   const addressList = useAppSelector((state) => state.address.list);
@@ -23,21 +27,97 @@ export default function OrderSummary({ totalPrice, items }: OrderSummaryProps) {
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [couponCodeInput, setCouponCodeInput] = useState("");
   const [coupon, setCoupon] = useState<Coupon | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCouponCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    // future work implement coupon validation
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading("Verifying coupon...");
+    try {
+      if (!user) {
+        return toast.error("Please login to proceed", { id: loadingToastId });
+      }
+      const res = await fetch("/api/coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCodeInput }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+      toast.success("Coupon applied successfully", { id: loadingToastId });
+      setCoupon(data.coupon);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Invalid coupon code";
+      toast.error(message, { id: loadingToastId });
+      setCoupon(null);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePlaceOrder = async (e: React.MouseEvent) => {
     e.preventDefault();
-    // future work add functionality to place order in DB
-    router.push("/orders");
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading("Placing order...");
+    try {
+      if (!user) {
+        return toast.error("Please login to proceed", { id: loadingToastId });
+      }
+      if (!selectedAddress) {
+        return toast.error("Please select an address", { id: loadingToastId });
+      }
+
+      const orderData = {
+        addressId: selectedAddress.id,
+        items: items.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+        })),
+        paymentMethod,
+        ...(coupon ? { couponCode: coupon.code } : {}),
+      };
+
+      // create order
+
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+      if (paymentMethod === "STRIPE") {
+        window.location.href = data.session.url;
+      } else {
+        toast.success(data.message, { id: loadingToastId });
+        router.push("/orders");
+        dispatch(fetchCart());
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Invalid coupon code";
+      toast.error(message, { id: loadingToastId });
+      setCoupon(null);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   const discountAmount = coupon ? (coupon.discount / 100) * totalPrice : 0;
-  const finalTotal = coupon
+  const finalTotalForPlusUser = coupon
     ? (totalPrice - discountAmount).toFixed(2)
     : totalPrice.toLocaleString();
+  const finalTotalForRegularUser = coupon
+    ? (totalPrice + 5 - discountAmount).toFixed(2)
+    : (totalPrice + 5).toLocaleString();
 
   return (
     <div className="w-full max-w-lg lg:max-w-sm bg-slate-50/30 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 text-sm rounded-xl p-7 transition-colors">
@@ -142,7 +222,11 @@ export default function OrderSummary({ totalPrice, items }: OrderSummaryProps) {
           </div>
           <div className="flex flex-col gap-1.5 font-medium text-right text-slate-800 dark:text-slate-100">
             <p>${totalPrice.toLocaleString()}</p>
-            <p>Free</p>
+            <p>
+              <Protect plan="plus" fallback={`$5`}>
+                Free
+              </Protect>
+            </p>
             {coupon && (
               <p className="text-red-500">-${discountAmount.toFixed(2)}</p>
             )}
@@ -151,13 +235,7 @@ export default function OrderSummary({ totalPrice, items }: OrderSummaryProps) {
 
         {!coupon ? (
           <form
-            onSubmit={(e) =>
-              toast.promise(handleCouponCode(e), {
-                loading: "Checking coupon...",
-                success: "Coupon applied successfully!",
-                error: "Invalid coupon code.",
-              })
-            }
+            onSubmit={handleCouponCode}
             className="flex justify-center gap-3 mt-4"
           >
             <input
@@ -168,8 +246,12 @@ export default function OrderSummary({ totalPrice, items }: OrderSummaryProps) {
               aria-label="Coupon code"
               className="border border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-white p-2 text-xs rounded w-full outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
             />
-            <button className="bg-slate-700 dark:bg-green-600 text-white px-4 rounded text-xs hover:bg-slate-800 dark:hover:bg-green-700 active:scale-95 transition-all">
-              Apply
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-slate-700 dark:bg-green-600 text-white px-4 rounded text-xs hover:bg-slate-800 dark:hover:bg-green-700 active:scale-95 transition-all"
+            >
+              {isSubmitting ? "APPLYING..." : "APPLY"}
             </button>
           </form>
         ) : (
@@ -191,20 +273,17 @@ export default function OrderSummary({ totalPrice, items }: OrderSummaryProps) {
 
       <div className="flex justify-between py-4 text-slate-800 dark:text-slate-100 font-semibold">
         <p>Total:</p>
-        <p className="text-right">${finalTotal}</p>
+        <Protect plan="plus" fallback={"$" + finalTotalForRegularUser}>
+          <p className="text-right">${finalTotalForPlusUser}</p>
+        </Protect>
       </div>
 
       <button
-        onClick={(e) =>
-          toast.promise(handlePlaceOrder(e), {
-            loading: "Placing order...",
-            success: "Order placed successfully!",
-            error: "Something went wrong.",
-          })
-        }
+        disabled={isSubmitting}
+        onClick={handlePlaceOrder}
         className="w-full bg-slate-800 dark:bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-slate-900 dark:hover:bg-green-700 active:scale-95 transition-all shadow-md"
       >
-        Place Order
+        {isSubmitting ? "Placing..." : "Place Order"}
       </button>
 
       {showAddressModal && (

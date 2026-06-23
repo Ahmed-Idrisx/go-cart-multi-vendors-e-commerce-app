@@ -101,7 +101,7 @@ export interface Product {
   updatedAt: DateInput;
 
   // Relations
-  store: Store;
+  store?: Store;
   rating: Rating[];
 }
 
@@ -192,7 +192,7 @@ export interface Order {
    * flexible for an empty object `{}` while still giving you
    * autocomplete for the real coupon fields.
    */
-  coupon?: Partial<Coupon>;
+  coupon?: Coupon;
   orderItems: OrderItem[];
 
   // Relations

@@ -7,6 +7,12 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json(
+        { error: "you are not authorized" },
+        { status: 401 },
+      );
+    }
     const isSeller = await authSeller(userId as string);
     if (!isSeller) {
       return NextResponse.json(
@@ -16,7 +22,7 @@ export async function GET() {
     }
     const storeInfo = await prisma.store.findUnique({
       where: {
-        userId: userId as string,
+        userId: userId,
       },
     });
 

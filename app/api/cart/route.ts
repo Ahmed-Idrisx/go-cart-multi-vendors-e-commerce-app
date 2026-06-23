@@ -2,43 +2,25 @@ import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
-interface AddRatingBody {
-  orderId: string;
-  productId: string;
-  rating: number;
-  review: string;
-}
-
-// Add new rating
+// update user cart
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: "Not Authorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { orderId, productId, rating, review } =
-      (await request.json()) as AddRatingBody;
-    const order = await prisma.order.findFirst({
-      where: { id: orderId, userId: userId },
-    });
-    if (!order) {
-      return NextResponse.json({ error: "Order Not Found" }, { status: 404 });
-    }
-    const isAlreadyRated = await prisma.rating.findFirst({
-      where: { productId, orderId },
-    });
-    if (isAlreadyRated) {
+    const { cart } = await request.json();
+    if (!cart || typeof cart !== "object") {
       return NextResponse.json(
-        { error: "Product Already Rated" },
-        { status: 404 },
+        { error: "Invalid cart payload" },
+        { status: 400 },
       );
     }
-    const response = await prisma.rating.create({
-      data: { userId, orderId, productId, rating, review },
+    await prisma.user.update({
+      where: { id: userId },
+      data: { cart },
     });
-    return NextResponse.json({
-      message: "Rating added successfully",
-    });
+    return NextResponse.json({ message: "Cart Updated" });
   } catch (error) {
     console.error(error);
     const message =
@@ -51,17 +33,23 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// get all rating for a user
+// GET /cart – fetch the user's cart
 export async function GET() {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 404 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const ratings = await prisma.rating.findMany({
-      where: { userId },
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
     });
-    return NextResponse.json({ ratings });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ cart: user.cart });
   } catch (error) {
     console.error(error);
     const message =

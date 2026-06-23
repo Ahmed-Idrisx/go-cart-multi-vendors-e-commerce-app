@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Star, XIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import { useAppDispatch } from "@/hooks/hooks";
+import { addRating } from "@/lib/features/rating/ratingSlice";
 
 interface RatingModalProps {
   ratingModal: {
@@ -21,17 +23,48 @@ export default function RatingModal({
   ratingModal,
   setRatingModal,
 }: RatingModalProps) {
+  const dispatch = useAppDispatch();
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     if (rating <= 0 || rating > 5) {
       toast("Please select a rating");
+      throw new Error("Rating not selected");
     }
     if (review.length < 5) {
       toast("Write a review of at least 5 characters");
+      throw new Error("Review too short");
     }
-    setRatingModal(null);
+
+    setIsSubmitting(true);
+    const loadingToastId = toast.loading("Rate Adding...");
+    try {
+      const res = await fetch("/api/rating", {
+        method: "POST",
+        body: JSON.stringify({
+          productId: ratingModal.productId,
+          orderId: ratingModal.orderId,
+          rating,
+          review,
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+      dispatch(addRating(data.rating));
+      toast.success(data.message, { id: loadingToastId });
+      setRatingModal(null);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Something went wrong";
+      toast.error(message, { id: loadingToastId });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -68,14 +101,11 @@ export default function RatingModal({
           onChange={(e) => setReview(e.target.value)}
         ></textarea>
         <button
-          onClick={() =>
-            toast.promise(handleSubmit(), {
-              loading: "Submitting...",
-            })
-          }
+          disabled={isSubmitting}
+          onClick={handleSubmit}
           className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition shadow-md"
         >
-          Submit Rating
+          {isSubmitting ? "Submitting..." : "Submit Rating"}
         </button>
       </div>
     </div>
