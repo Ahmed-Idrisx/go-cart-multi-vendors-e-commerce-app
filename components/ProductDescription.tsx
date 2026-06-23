@@ -77,18 +77,18 @@ const ProductDescription = ({ product }: { product: Product }) => {
       {/* Store Section */}
       <div className="flex gap-3 mt-14 items-center">
         <Image
-          src={product.store.logo as string}
-          alt={product.store.name || "product name"}
+          src={product.store?.logo as string}
+          alt={product.store?.name || "product name"}
           className="w-11 h-11 rounded-full object-cover ring-1 ring-green-400"
           width={100}
           height={100}
         />
         <div>
           <p className="font-medium text-slate-600 dark:text-slate-300">
-            Product by {product.store.name}
+            Product by {product.store?.name}
           </p>
           <Link
-            href={`/shop/${product.store.username}`}
+            href={`/shop/${product.store?.username}`}
             className="flex items-center gap-1.5 text-green-600 dark:text-green-400 hover:underline"
           >
             View store <ArrowRight size={14} />
