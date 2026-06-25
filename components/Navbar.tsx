@@ -14,6 +14,7 @@ export default function Navbar() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const cartCount = useAppSelector((state) => state.cart.total);
+  const wishlistCount = useAppSelector((state) => state.wishlist.total);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,13 +97,13 @@ export default function Navbar() {
             </form>
             {/* Wishlist Link */}
             <Link
-              href="/cart"
+              href="/wishlist"
               className="relative flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-green-600 dark:hover:text-green-400 transition-colors"
             >
               <Heart size={18} />
               Wishlist
               <span className="absolute -top-1.5 left-3 text-[8px] text-white bg-rose-500 size-3.5 rounded-full flex items-center justify-center font-bold">
-                4
+                {wishlistCount}
               </span>
             </Link>
             {/* Cart Link */}

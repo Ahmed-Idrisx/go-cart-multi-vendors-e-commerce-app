@@ -42,6 +42,7 @@ export default function OrderItem({ order }: { order: Order }) {
   } | null>(null);
 
   const { ratings } = useAppSelector((state) => state.rating);
+  console.log(ratings);
 
   return (
     <>
@@ -51,8 +52,11 @@ export default function OrderItem({ order }: { order: Order }) {
             {order.orderItems.map((item) => {
               const existingRating = ratings.find(
                 (r) =>
-                  order.id === r.orderId && item.product.id === r.productId,
+                  r &&
+                  order.id === r.orderId &&
+                  item.product.id === r.productId,
               );
+
               return (
                 <div
                   key={`${order.id}-${item.productId}`}

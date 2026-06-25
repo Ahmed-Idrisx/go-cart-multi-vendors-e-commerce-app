@@ -5,6 +5,8 @@ import { fetchAddress } from "@/lib/features/address/addressSlice";
 import { fetchCart, uploadCart } from "@/lib/features/cart/cartSlice";
 import { fetchProducts } from "@/lib/features/product/productSlice";
 import { fetchRatings } from "@/lib/features/rating/ratingSlice";
+import { fetchWishlist } from "@/lib/features/wishlist/wishlistSlice";
+
 import { useUser } from "@clerk/nextjs";
 import { useEffect } from "react";
 
@@ -22,6 +24,7 @@ export default function AppInitializer() {
       dispatch(fetchCart());
       dispatch(fetchAddress());
       dispatch(fetchRatings());
+      dispatch(fetchWishlist());
     }
   }, [dispatch, user]);
 

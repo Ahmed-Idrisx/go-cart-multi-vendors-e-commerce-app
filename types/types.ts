@@ -44,6 +44,7 @@ export type StoreStatus = "pending" | "approved" | "rejected";
 
 /** Shape of the JSON `cart` field: { [productId]: quantity } */
 export type Cart = Record<string, number>;
+export type Wishlist = Record<string, boolean>;
 
 /* ============================================================ */
 /*  User                                                         */

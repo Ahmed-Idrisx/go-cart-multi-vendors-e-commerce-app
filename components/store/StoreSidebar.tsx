@@ -9,7 +9,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { Store } from "@/types/types";
-import { assets } from "@/assets/assets";
 
 const StoreSidebar = ({ storeInfo }: { storeInfo: Store | null }) => {
   const pathname = usePathname();
@@ -30,7 +29,7 @@ const StoreSidebar = ({ storeInfo }: { storeInfo: Store | null }) => {
       <div className="flex flex-col gap-3 justify-center items-center pt-8 max-sm:hidden">
         <Image
           className="w-14 h-14 rounded-full shadow-md"
-          src={storeInfo?.logo ?? assets.default_avatar}
+          src={storeInfo?.logo ?? "/default-avatar.png"}
           alt="store logo"
           width={80}
           height={80}

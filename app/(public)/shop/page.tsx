@@ -1,6 +1,6 @@
 import ProductCard from "@/components/ProductCard";
 import { Suspense } from "react";
-import { MoveLeftIcon } from "lucide-react";
+import { MoveLeftIcon, SearchXIcon } from "lucide-react";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 
@@ -22,7 +22,11 @@ const ShopContent = async ({ search }: { search: string }) => {
   products = products.filter((products) => products.store.isActive);
 
   const filteredProducts = search
-    ? products.filter((product) => product.name.toLowerCase().includes(search))
+    ? products.filter(
+        (product) =>
+          product.name.toLowerCase().includes(search.toLowerCase()) ||
+          product.category?.toLowerCase().includes(search.toLowerCase()),
+      )
     : products;
 
   return (
@@ -36,11 +40,35 @@ const ShopContent = async ({ search }: { search: string }) => {
             <span className="text-slate-700 font-medium">Products</span>
           </Link>
         </h1>
-        <div className="grid grid-cols-2  sm:flex flex-wrap justify-center gap-6 xl:gap-12 mx-auto mb-32">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+
+        {filteredProducts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center gap-3 py-24 text-slate-400 dark:text-slate-500">
+            <SearchXIcon size={48} className="opacity-60" />
+            <p className="text-lg font-medium text-slate-500 dark:text-slate-400">
+              No products found
+            </p>
+            {search && (
+              <p className="text-sm">
+                We couldn&apos;t find any results for{" "}
+                <span className="font-medium text-slate-600 dark:text-slate-300">
+                  &quot;{search}&quot;
+                </span>
+              </p>
+            )}
+            <Link
+              href={"/shop"}
+              className="mt-3 text-sm text-green-600 dark:text-green-400 hover:underline"
+            >
+              View all products
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2  sm:flex flex-wrap justify-center gap-6 xl:gap-12 mx-auto mb-32">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

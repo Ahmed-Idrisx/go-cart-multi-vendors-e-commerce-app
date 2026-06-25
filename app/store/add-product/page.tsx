@@ -1,5 +1,4 @@
 "use client";
-import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -119,7 +118,7 @@ export default function StoreAddProduct() {
               src={
                 images[key]
                   ? URL.createObjectURL(images[key] as File)
-                  : assets.upload_area
+                  : "/upload_area.svg"
               }
               alt="product image"
             />

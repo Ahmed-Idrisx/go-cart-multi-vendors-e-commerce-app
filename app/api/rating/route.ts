@@ -33,11 +33,12 @@ export async function POST(request: NextRequest) {
         { status: 404 },
       );
     }
-    const response = await prisma.rating.create({
+    const createdRating = await prisma.rating.create({
       data: { userId, orderId, productId, rating, review },
     });
     return NextResponse.json({
       message: "Rating added successfully",
+      rating: createdRating,
     });
   } catch (error) {
     console.error(error);

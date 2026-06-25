@@ -1,5 +1,4 @@
 "use client";
-import { assets } from "@/assets/assets";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -57,7 +56,7 @@ export default function CreateStore({
   const imagePreview =
     storeInfo.image instanceof File
       ? URL.createObjectURL(storeInfo.image)
-      : assets.upload_area;
+      : "/upload_area.svg";
 
   const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

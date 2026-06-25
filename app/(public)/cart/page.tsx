@@ -55,7 +55,7 @@ export default function Cart() {
           <table className="w-full max-w-4xl text-slate-600 dark:text-slate-400 table-auto">
             <thead>
               <tr className="max-sm:text-sm">
-                <th className="text-left">Product</th>
+                <th className="text-left pl-3">Product</th>
                 <th>Quantity</th>
                 <th>Total Price</th>
                 <th className="max-md:hidden">Remove</th>
@@ -63,8 +63,11 @@ export default function Cart() {
             </thead>
             <tbody>
               {cartArray.map((item) => (
-                <tr key={item.id} className="space-x-2">
-                  <td className="flex gap-3 my-4">
+                <tr
+                  key={item.id}
+                  className="space-x-2 bg-slate-50/30 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700"
+                >
+                  <td className="flex gap-3 my-4 pl-3">
                     <div className="flex gap-3 items-center justify-center bg-slate-100 dark:bg-slate-800 size-18 rounded-md">
                       <Image
                         src={item.images[0] as string}

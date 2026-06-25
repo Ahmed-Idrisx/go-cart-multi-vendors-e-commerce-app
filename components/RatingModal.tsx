@@ -56,6 +56,7 @@ export default function RatingModal({
         throw new Error(data.error || "Something went wrong");
       }
       dispatch(addRating(data.rating));
+      console.log("Redux rating:", data.rating);
       toast.success(data.message, { id: loadingToastId });
       setRatingModal(null);
     } catch (error) {
